@@ -1,1 +1,3 @@
 git commands even a monkey could understand
+
+Register a change in the index
