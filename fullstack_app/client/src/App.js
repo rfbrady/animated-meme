@@ -6,8 +6,8 @@ import axios from 'axios';
 class App extends Component {
 	// initialize our state
 	state = {
-			data: [];
-			id: 0;
+			data: [],
+			id: 0,
 			message: null,
 			intervalIsSet: false,
 			idToDelete: null,
@@ -44,7 +44,7 @@ class App extends Component {
 	// our first get method that uses our backen api 
 	// to fetch data from our database
 	getDataFromDb = () => {
-		fetch('http:/localhost:3001/api/getData')
+		fetch('http://localhost:3001/api/getData')
 			.then((data) => data.json())
 			.then((res) => this.setState({data: res.data}));
 	};
@@ -52,10 +52,10 @@ class App extends Component {
 	// our put method uses our backend api
 	// to create new query info in our database
 	putDataToDb = (message) => {
-		let currentIds = this.state.data.map((data) => data.id);
+		let currentIds = this.state.data.map(data => data.id);
 		let idToBeAdded = 0;
 		while (currentIds.includes(idToBeAdded)){
-			++idToBeAdded;
+			idToBeAdded += 1;
 		}
 
 		axios.post('http://localhost:3001/api/putData', {
@@ -66,19 +66,22 @@ class App extends Component {
 
 	// delete method that uses backend api
 	// to remove existing database info
-	deleteFromDb = (idToDelete) => {
-		parseInt(idToDelete);
+	deleteFromDb = idToDelete => {
+    window.alert(`id to delete is ${idToDelete}`);
+    parseInt(idToDelete);
 		let objIdToDelete = null;
-		this.state.data.forEach((data) => {
-			if (data.id == idToDelete) {
+		this.state.data.forEach(data => {
+      window.alert(data.id);
+			if (data.id === idToDelete) {
 				objIdToDelete = data._id;
+        window.alert("found");
 			}	
 		});
 
 		axios.delete('http://localhost:3001/api/deleteData', {
 			data: {
-				id: objIdToDelete,	
-			};	
+				id: objIdToDelete	
+			},	
 		});
 	};
 
@@ -86,25 +89,70 @@ class App extends Component {
 	// to overwrite existing database information
 	updateDb = (idToUpdate, updateToApply) => {
 		let objIdToUpdate = null;
-		parseInt(idToUpdate);
 		this.state.data.forEach((data) => {
-			if (data.id == idToUpdate){
+			if (data.id === idToUpdate){
 				objIdToUpdate = data._id;
 			}
 		});
 		
-		axios.post('http://localhost:3001', {
+		axios.post('http://localhost:3001/api/updateData', {
 			id: objIdToUpdate,
 			update: {message: updateToApply},
 		});
 	};
 
 	render() {
+		const {data} = this.state;
     return (
-      <div>
-        Im ready to use back end apis yay
-      </div>
-      
+			<div>
+				<ul>
+					{data.length <= 0 ? 'NO DB ENTRIES yeT' : data.map(data => (
+							<li style={{ padding: '10px'}} key={data}>
+								<span style={{color: 'gray'}}> id: </span> {data.id } <br />
+								<span style={{color: 'gray'}}> data: </span> {data.message}
+							</li>
+						))}
+				</ul>
+				<div>
+					<input
+						type="text"
+						onChange={(e) => this.setState({message: e.target.value})}
+						placeholder="add something in the database"
+						style={{width: '200px'}}
+					/>
+					<button onClick={() => this.putDataToDb(this.state.message)}>
+						Add
+					</button>
+				</div>
+        <div>
+          <input 
+            type="text"
+            onChange={ (e) => this.setState({idToDelete: e.target.value})}
+            placeholder="put id of item to delete here"
+          />
+          <button onClick={() => this.deleteFromDb(this.state.idToDelete)}>
+            Delete 
+          </button>
+        </div>
+        <div>
+          <input 
+            type="text"
+            onChange={(e) => this.setState({idToUpdate: e.target.value})}
+            placeholder="put id of item to update here"
+          />
+          <input 
+            type="text"
+            onChange={(e) => this.setState({updateToApply: e.target.value})}
+            placeholder="put new value of item item to update here"
+          />
+          <button onClick={() => this.updateDb(this.state.idToUpdate)}>
+            Update 
+          </button>
+        </div>
+
+
+
+			</div>    
     );
   }
 }
